@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/secure_storage_service.dart';
 import 'user_list_screen.dart';
 import 'login_screen.dart';
+import 'post_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -290,6 +291,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              // tombol Daftar Posts (Latihan 3)
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PostListScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.article),
+                  label: const Text('Lihat Daftar Posts'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
               // Section 3: Catatan Keamanan
               Card(
                 color: Colors.amber[50],
