@@ -6,19 +6,41 @@ import '../widgets/user_card.dart';
 
 class UserListScreen extends StatefulWidget {
   const UserListScreen({super.key});
+
   @override
   State<UserListScreen> createState() => _UserListScreenState();
 }
 
 class _UserListScreenState extends State<UserListScreen> {
   final ApiService _apiService = ApiService();
+  final TextEditingController _searchController =
+      TextEditingController(); // Latihan 4
   List<User> _users = [];
+  String _searchQuery = ''; // Latihan 4
   bool _isLoading = true;
   String? _errorMessage;
+
+  // Latihan 4: daftar user yang sudah difilter berdasarkan nama atau email
+  List<User> get _filteredUsers {
+    if (_searchQuery.isEmpty) return _users;
+    final query = _searchQuery.toLowerCase();
+    return _users.where((user) {
+      return user.name.toLowerCase().contains(query) ||
+          user.email.toLowerCase().contains(query);
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUsers();
+  }
+
+  // Latihan 4
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUsers() async {
@@ -26,6 +48,7 @@ class _UserListScreenState extends State<UserListScreen> {
       _isLoading = true;
       _errorMessage = null;
     });
+
     try {
       final users = await _apiService.getUsers();
       setState(() {
@@ -73,6 +96,7 @@ class _UserListScreenState extends State<UserListScreen> {
         ),
       );
     }
+
     // Error state
     if (_errorMessage != null) {
       return Center(
@@ -104,25 +128,63 @@ class _UserListScreenState extends State<UserListScreen> {
         ),
       );
     }
+
     // Empty state
     if (_users.isEmpty) {
       return const Center(child: Text('Tidak ada data pengguna'));
     }
-    // Success state
-    return RefreshIndicator(
-      onRefresh: _loadUsers,
-      child: ListView.builder(
-        itemCount: _users.length,
-        itemBuilder: (context, index) {
-          final user = _users[index];
-          return UserCard(
-            user: user,
-            onTap: () {
-              _showUserDetail(user);
+
+    // Success state = kolom pencarian + daftar hasil filter
+    final users = _filteredUsers;
+
+    return Column(
+      children: [
+        // Latihan 4: TextField pencarian (Latihan 4a)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: TextField(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Cari nama atau email...',
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
+              suffixIcon: _searchQuery.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() => _searchQuery = '');
+                      },
+                    ),
+            ),
+            // Latihan 4: real-time lewat setState (Latihan 4b, 4c)
+            onChanged: (value) {
+              setState(() => _searchQuery = value.trim());
             },
-          );
-        },
-      ),
+          ),
+        ),
+        Expanded(
+          child: users.isEmpty
+              ? const Center(child: Text('Pengguna tidak ditemukan'))
+              : RefreshIndicator(
+                  onRefresh: _loadUsers,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: users.length, // DIUBAH: users (hasil filter)
+                    itemBuilder: (context, index) {
+                      final user = users[index]; // DIUBAH
+                      return UserCard(
+                        user: user,
+                        onTap: () {
+                          _showUserDetail(user);
+                        },
+                      );
+                    },
+                  ),
+                ),
+        ),
+      ],
     );
   }
 
