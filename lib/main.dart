@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
+import 'services/secure_storage_service.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  // async
+  WidgetsFlutterBinding.ensureInitialized();
+  final isLoggedIn = await SecureStorageService().hasToken();
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  const MyApp({super.key, required this.isLoggedIn});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,7 +24,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      // kalau sudah ada token -> Home, kalau belum -> Login
+      home: isLoggedIn ? const HomeScreen() : const LoginScreen(),
     );
   }
 }

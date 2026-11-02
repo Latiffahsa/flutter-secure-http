@@ -85,6 +85,20 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Card(
+                color: _hasToken ? Colors.green[50] : Colors.red[50],
+                child: ListTile(
+                  leading: Icon(
+                    _hasToken ? Icons.verified_user : Icons.no_accounts,
+                    color: _hasToken ? Colors.green : Colors.red,
+                  ),
+                  title: Text(
+                    _hasToken ? 'Status: Sudah Login' : 'Status: Belum Login',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               // Section 1: Secure Storage
               Card(
                 child: Padding(
